@@ -21,9 +21,13 @@ In here, you have to select the attribute you want to use to filter the products
 
 ![Widget UI](img/widget-ui.png)
 
-The cool thing about this filter is that it uses the same styles as the **Filter Products by Price** Woocommerce widget, so it should be compatible with most available themes. 
 
-FYI, the slider has been extensively tested with the **ShopIsle** theme.
+## Features
+
+* It lets you filter Woocommerce products by a numeric attribute, using a `from` - `to` slider
+* It lets you choose the attribute you want to filter with on the widget page (no need to get you hands dirty with code)
+* It uses the same styles as the **Filter Products by Price** Woocommerce widget, so it should be compatible with most available themes (FYI, the slider has been extensively tested with the **ShopIsle** theme)
+* You can include more than one filter on the same page to filter by different attributes
 
 ## References
 
