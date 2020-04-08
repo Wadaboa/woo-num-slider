@@ -23,6 +23,17 @@ class Woo_Num_Slider extends WP_Widget
 		add_action('plugins_loaded', [$this, 'load_our_textdomain']);
 		add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
 		parent::__construct('woo-num-slider', 'Woocommerce Numeric Slider', $widget_options);
+
+		/* Compatibility with PHP < 7.3.0 */
+		if (!function_exists('array_key_first')) {
+			function array_key_first(array $arr)
+			{
+				foreach ($arr as $key => $unused) {
+					return $key;
+				}
+				return NULL;
+			}
+		}
 	}
 
 	/* Load textdomain */
@@ -74,16 +85,22 @@ class Woo_Num_Slider extends WP_Widget
 	/* Show the widget on the site */
 	function widget($args, $instance)
 	{
-		// Display before widget and widget title
-		echo $args['before_widget'];
-		if (!empty($instance['title'])) {
-			echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
+		// Exit if we are not in the shop
+		if (!is_shop() && !is_product_taxonomy()) {
+			return;
 		}
 
 		// Extract attribute values
 		$attributes = get_wc_attributes();
 		$attribute = $attributes[$instance['attribute']];
 		$terms = get_terms('pa_' . $attribute->attribute_name);
+
+		// If there are not posts and we're not filtering, hide the widget
+		$min_value_key = $attribute->attribute_name . '_min_value';
+		$max_value_key = $attribute->attribute_name . '_max_value';
+		if (!WC()->query->get_main_query()->post_count && !isset($_GET[$min_value_key]) && !isset($_GET[$max_value_key])) {
+			return;
+		}
 
 		// Extract max and min values
 		$min_value = INF;
@@ -104,14 +121,18 @@ class Woo_Num_Slider extends WP_Widget
 			return;
 		}
 
+		// Display before widget and widget title
+		echo $args['before_widget'];
+		if (!empty($instance['title'])) {
+			echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
+		}
+
 		// Round values to nearest ten
 		$min_value = floor($min_value / 10) * 10;
 		$max_value = ceil($max_value / 10) * 10;
 
 		// Set slider options
 		$step = 5;
-		$min_value_key = $attribute->attribute_name . '_min_value';
-		$max_value_key = $attribute->attribute_name . '_max_value';
 		$current_min_value = isset($_GET[$min_value_key]) ? floor(floatval(wp_unslash($_GET[$min_value_key])) / $step) * $step : $min_value;
 		$current_max_value = isset($_GET[$max_value_key]) ? ceil(floatval(wp_unslash($_GET[$max_value_key])) / $step) * $step : $max_value;
 
