@@ -59,6 +59,7 @@ class Woo_Num_Slider extends WP_Widget
 		$title = !empty($instance['title']) ? $instance['title'] : __('New title', 'text_domain');
 		$attributes = get_wc_attributes();
 		$attribute = !empty($instance['attribute']) ? $instance['attribute'] : array_key_first($attributes);
+		$step = !empty($instance['step']) ? $instance['step'] : 5;
 ?>
 		<p>
 			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
@@ -69,6 +70,8 @@ class Woo_Num_Slider extends WP_Widget
 					<option <?php selected($attribute, $key); ?> value="<?php echo $key ?>"><?php echo $value->attribute_label ?></option>
 				<?php endforeach ?>
 			</select>
+			<label for="<?php echo $this->get_field_id('step'); ?>"><?php _e('Step:'); ?></label>
+			<input class="widefat" id="<?php echo $this->get_field_id('step'); ?>" name="<?php echo $this->get_field_name('step'); ?>" type="number" value="<?php echo esc_attr($step); ?>">
 		</p>
 	<?php
 	}
@@ -79,6 +82,7 @@ class Woo_Num_Slider extends WP_Widget
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['attribute'] = $new_instance['attribute'];
+		$instance['step'] = $new_instance['step'];
 		return $instance;
 	}
 
@@ -127,15 +131,10 @@ class Woo_Num_Slider extends WP_Widget
 			echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
 		}
 
-		// Round values to nearest ten
-		if ($max_value - $min_value > 10) {
-			$min_value = floor($min_value / 10) * 10;
-			$max_value = ceil($max_value / 10) * 10;
-		}
-
 		// Set slider options
-		$terms_num = count(get_terms('pa_' . $attribute->attribute_name));
-		$step = (int) (($max_value - $min_value) / $terms_num);
+		$step = (int) $instance['step'];
+		$min_value = floor($min_value / $step) * $step;
+		$max_value = ceil($max_value / $step) * $step;
 		$current_min_value = isset($_GET[$min_value_key]) ? floor(to_numerical(wp_unslash($_GET[$min_value_key])) / $step) * $step : $min_value;
 		$current_max_value = isset($_GET[$max_value_key]) ? ceil(to_numerical(wp_unslash($_GET[$max_value_key])) / $step) * $step : $max_value;
 
