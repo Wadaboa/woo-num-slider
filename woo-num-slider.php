@@ -4,7 +4,7 @@
  * Plugin Name: Woocommerce Numeric Slider
  * Plugin URI: https://alessiofalai.it
  * Description: A simple widget to filter Woocommerce products by a numeric attribute using a slider.
- * Version: 0.1
+ * Version: 0.1.1
  * Author: Alessio Falai
  * Author URI: https://alessiofalai.it
  */
@@ -106,8 +106,8 @@ class Woo_Num_Slider extends WP_Widget
 		$min_value = INF;
 		$max_value = -INF;
 		foreach ($terms as $key => $term) {
-			if (is_numeric($term->name)) {
-				$value = floatval($term->name);
+			$value = to_numerical($term->name);
+			if ($value) {
 				if ($value < $min_value) {
 					$min_value = $value;
 				} else if ($value > $max_value) {
@@ -128,13 +128,16 @@ class Woo_Num_Slider extends WP_Widget
 		}
 
 		// Round values to nearest ten
-		$min_value = floor($min_value / 10) * 10;
-		$max_value = ceil($max_value / 10) * 10;
+		if ($max_value - $min_value > 10) {
+			$min_value = floor($min_value / 10) * 10;
+			$max_value = ceil($max_value / 10) * 10;
+		}
 
 		// Set slider options
-		$step = 5;
-		$current_min_value = isset($_GET[$min_value_key]) ? floor(floatval(wp_unslash($_GET[$min_value_key])) / $step) * $step : $min_value;
-		$current_max_value = isset($_GET[$max_value_key]) ? ceil(floatval(wp_unslash($_GET[$max_value_key])) / $step) * $step : $max_value;
+		$terms_num = count(get_terms('pa_' . $attribute->attribute_name));
+		$step = (int) (($max_value - $min_value) / $terms_num);
+		$current_min_value = isset($_GET[$min_value_key]) ? floor(to_numerical(wp_unslash($_GET[$min_value_key])) / $step) * $step : $min_value;
+		$current_max_value = isset($_GET[$max_value_key]) ? ceil(to_numerical(wp_unslash($_GET[$max_value_key])) / $step) * $step : $max_value;
 
 		global $wp;
 		if ('' === get_option('permalink_structure')) {
@@ -221,17 +224,15 @@ class Woo_Num_Slider extends WP_Widget
 		// Compose tax query
 		$tax_query = array('relation' => 'AND');
 		foreach ($attribute_names as $key => $attribute_name) {
-			$min_value = floatval($_GET[$attribute_name . '_min_value']);
-			$max_value = floatval($_GET[$attribute_name . '_max_value']);
+			$min_value = to_numerical($_GET[$attribute_name . '_min_value']);
+			$max_value = to_numerical($_GET[$attribute_name . '_max_value']);
 
 			$terms = get_terms('pa_' . $attribute_name);
 			$amps = [];
 			foreach ($terms as $key => $term) {
-				if (is_numeric($term->name)) {
-					$value = floatval($term->name);
-					if ($value <= $max_value && $value >= $min_value) {
-						$amps[] = $term->term_id;
-					}
+				$value = to_numerical($term->name);
+				if ($value && $value <= $max_value && $value >= $min_value) {
+					$amps[] = $term->term_id;
 				}
 			}
 
@@ -242,10 +243,10 @@ class Woo_Num_Slider extends WP_Widget
 			));
 		}
 
-
-		if (isset($this->product_query->tax_query)) {
-			$tax_query = array_merge($this->product_query->tax_query->queries, $tax_query);
+		if (!empty($this->product_query->get('tax_query'))) {
+			$tax_query = array_merge($this->product_query->get('tax_query'), $tax_query);
 		}
+
 		return $tax_query;
 	}
 }
@@ -270,6 +271,24 @@ function get_wc_attributes()
 	}
 
 	return $attribute_taxonomies;
+}
+
+/* Convert a string representing a number to a float */
+function to_numerical($attr)
+{
+	if (is_numeric($attr)) {
+		return floatval($attr);
+	}
+	if (is_string($attr) && strpos($attr, '/') !== false) {
+		$exploded = explode('/', $attr);
+		if (count($exploded) > 2 || !is_numeric($exploded[0]) || !is_numeric($exploded[1])) {
+			return false;
+		}
+		$num = floatval($exploded[0]);
+		$den = floatval($exploded[1]);
+		return $num / $den;
+	}
+	return false;
 }
 
 /* Filter an array by keys */
