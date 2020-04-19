@@ -281,14 +281,21 @@ function to_numerical($attr)
 	if (is_numeric($attr)) {
 		return floatval($attr);
 	}
-	if (is_string($attr) && strpos($attr, '/') !== false) {
-		$exploded = explode('/', $attr);
-		if (count($exploded) > 2 || !is_numeric($exploded[0]) || !is_numeric($exploded[1])) {
-			return false;
+	if (is_string($attr)) {
+		if (strpos($attr, ',') !== false) {
+			$attr = str_replace(',', '.', $attr);
+			if (is_numeric($attr)) {
+				return floatval($attr);
+			}
+		} else if (strpos($attr, '/') !== false) {
+			$exploded = explode('/', $attr);
+			if (count($exploded) > 2 || !is_numeric($exploded[0]) || !is_numeric($exploded[1])) {
+				return false;
+			}
+			$num = floatval($exploded[0]);
+			$den = floatval($exploded[1]);
+			return $num / $den;
 		}
-		$num = floatval($exploded[0]);
-		$den = floatval($exploded[1]);
-		return $num / $den;
 	}
 	return false;
 }
