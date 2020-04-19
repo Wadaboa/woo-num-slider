@@ -1,0 +1,49 @@
+# Copyright (C) 2020 Alessio Falai
+# This file is distributed under the same license as the Woocommerce Numeric Slider plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Woocommerce Numeric Slider 0.1.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woo-num-slider\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-04-19T12:47:25+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.4.0\n"
+"X-Domain: woo-num-slider\n"
+
+#. Plugin Name of the plugin
+msgid "Woocommerce Numeric Slider"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://alessiofalai.it"
+msgstr ""
+
+#. Description of the plugin
+#: woo-num-slider.php:20
+msgid "A simple widget to filter Woocommerce products by a numeric attribute using a slider."
+msgstr ""
+
+#. Author of the plugin
+msgid "Alessio Falai"
+msgstr ""
+
+#: woo-num-slider.php:66
+msgid "Title"
+msgstr ""
+
+#: woo-num-slider.php:68
+msgid "Attribute"
+msgstr ""
+
+#: woo-num-slider.php:74
+msgid "Step"
+msgstr ""
+
+#: woo-num-slider.php:160
+msgid "Value"
+msgstr ""

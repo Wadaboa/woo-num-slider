@@ -4,9 +4,11 @@
  * Plugin Name: Woocommerce Numeric Slider
  * Plugin URI: https://alessiofalai.it
  * Description: A simple widget to filter Woocommerce products by a numeric attribute using a slider.
- * Version: 0.1.1
+ * Version: 0.1.2
  * Author: Alessio Falai
  * Author URI: https://alessiofalai.it
+ * Text Domain: woo-num-slider
+ * Domain Path: /lang/
  */
 class Woo_Num_Slider extends WP_Widget
 {
@@ -20,11 +22,11 @@ class Woo_Num_Slider extends WP_Widget
 			'description' => __('A simple widget to filter Woocommerce products by a numeric attribute using a slider.', 'woo-num-slider')
 		);
 		add_action('woocommerce_product_query', [$this, 'filter_by_current_range']);
-		add_action('plugins_loaded', [$this, 'load_our_textdomain']);
+		add_action('init', [$this, 'load_our_textdomain']);
 		add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
 		parent::__construct('woo-num-slider', 'Woocommerce Numeric Slider', $widget_options);
 
-		/* Compatibility with PHP < 7.3.0 */
+		// Compatibility with PHP < 7.3.0
 		if (!function_exists('array_key_first')) {
 			function array_key_first(array $arr)
 			{
@@ -56,21 +58,22 @@ class Woo_Num_Slider extends WP_Widget
 	/* Output the widget form */
 	public function form($instance)
 	{
-		$title = !empty($instance['title']) ? $instance['title'] : __('New title', 'text_domain');
 		$attributes = get_wc_attributes();
-		$attribute = !empty($instance['attribute']) ? $instance['attribute'] : array_key_first($attributes);
+		$default_title = $attributes[array_key_first($attributes)]->attribute_label;
+		$attribute = !empty($instance['attribute']) ? $instance['attribute'] : $default_title;
+		$title = !empty($instance['title']) ? $instance['title'] : $attribute;
 		$step = !empty($instance['step']) ? $instance['step'] : 5;
 ?>
 		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title', 'woo-num-slider'); ?>:</label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>">
-			<label for="<?php echo $this->get_field_id('attribute'); ?>"><?php _e('Attribute:'); ?></label>
+			<label for="<?php echo $this->get_field_id('attribute'); ?>"><?php _e('Attribute', 'woo-num-slider'); ?>:</label>
 			<select class="widefat" id="<?php echo $this->get_field_id('attribute'); ?>" name="<?php echo $this->get_field_name('attribute'); ?>">
 				<?php foreach ($attributes as $key => $value) : ?>
 					<option <?php selected($attribute, $key); ?> value="<?php echo $key ?>"><?php echo $value->attribute_label ?></option>
 				<?php endforeach ?>
 			</select>
-			<label for="<?php echo $this->get_field_id('step'); ?>"><?php _e('Step:'); ?></label>
+			<label for="<?php echo $this->get_field_id('step'); ?>"><?php _e('Step', 'woo-num-slider'); ?>:</label>
 			<input class="widefat" id="<?php echo $this->get_field_id('step'); ?>" name="<?php echo $this->get_field_name('step'); ?>" type="number" value="<?php echo esc_attr($step); ?>">
 		</p>
 	<?php
@@ -156,7 +159,7 @@ class Woo_Num_Slider extends WP_Widget
 					<input type="hidden" id="<?php echo $max_value_key; ?>" name="<?php echo $max_value_key; ?>" value="<?php echo esc_attr($current_max_value); ?>" data-max="<?php echo esc_attr($max_value); ?>" placeholder="<?php echo esc_attr__('Max value', 'woocommerce'); ?>" />
 					<button type="submit" class="button" style="padding: 10px 30px; line-height: 13px; float: left;"><?php echo esc_html__('Filter', 'woocommerce'); ?></button>
 					<div class="woo_num_label price_label">
-						<?php echo esc_html__('Value:', 'woocommerce'); ?> <span class="from"><?php echo $current_min_value; ?></span> &mdash; <span class="to"><?php echo $current_max_value; ?></span>
+						<?php echo esc_html__('Value', 'woo-num-slider'); ?>: <span class="from"><?php echo $current_min_value; ?></span> &mdash; <span class="to"><?php echo $current_max_value; ?></span>
 					</div>
 					<?php echo wc_query_string_form_fields(null, array($min_value_key, $max_value_key, 'paged'), '', true); ?>
 					<div class="clear"></div>
