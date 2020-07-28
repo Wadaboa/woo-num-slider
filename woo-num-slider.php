@@ -214,7 +214,7 @@ class Woo_Num_Slider extends WP_Widget
 		ksort($max_value_keys);
 
 		// If we don't have one of max or min, exit
-		if (count($min_value_keys) != count($max_value_keys)) {
+		if (is_array($min_value_keys) && is_array($max_value_keys) && count($min_value_keys) != count($max_value_keys)) {
 			return;
 		}
 
