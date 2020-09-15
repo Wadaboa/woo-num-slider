@@ -4,7 +4,7 @@
  * Plugin Name: Woocommerce Numeric Slider
  * Plugin URI: https://alessiofalai.it
  * Description: A simple widget to filter Woocommerce products by a numeric attribute using a slider.
- * Version: 0.1.2
+ * Version: 0.2.0
  * Author: Alessio Falai
  * Author URI: https://alessiofalai.it
  * Text Domain: woo-num-slider
@@ -63,6 +63,7 @@ class Woo_Num_Slider extends WP_Widget
 		$attribute = !empty($instance['attribute']) ? $instance['attribute'] : $default_title;
 		$title = !empty($instance['title']) ? $instance['title'] : $attribute;
 		$step = !empty($instance['step']) ? $instance['step'] : 5;
+		$query = !empty($instance['query']) ? $instance['query'] : 'AND';
 ?>
 		<p>
 			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title', 'woo-num-slider'); ?>:</label>
@@ -75,6 +76,11 @@ class Woo_Num_Slider extends WP_Widget
 			</select>
 			<label for="<?php echo $this->get_field_id('step'); ?>"><?php _e('Step', 'woo-num-slider'); ?>:</label>
 			<input class="widefat" id="<?php echo $this->get_field_id('step'); ?>" name="<?php echo $this->get_field_name('step'); ?>" type="number" value="<?php echo esc_attr($step); ?>">
+			<label for="<?php echo $this->get_field_id('query'); ?>"><?php _e('Query type', 'woo-num-slider'); ?>:</label>
+			<select class="widefat" id="<?php echo $this->get_field_id('query'); ?>" name="<?php echo $this->get_field_name('query'); ?>">
+				<option <?php selected($query, "AND"); ?> value="AND">AND</option>
+				<option <?php selected($query, "OR"); ?> value="OR">OR</option>
+			</select>
 		</p>
 	<?php
 	}
@@ -86,6 +92,7 @@ class Woo_Num_Slider extends WP_Widget
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['attribute'] = $new_instance['attribute'];
 		$instance['step'] = $new_instance['step'];
+		$instance['query'] = $new_instance['query'];
 		return $instance;
 	}
 
@@ -102,7 +109,7 @@ class Woo_Num_Slider extends WP_Widget
 		$attribute = $attributes[$instance['attribute']];
 		$terms = get_terms('pa_' . $attribute->attribute_name);
 
-		// If there are not posts and we're not filtering, hide the widget
+		// If there are no posts and we're not filtering, hide the widget
 		$min_value_key = $attribute->attribute_name . '_min_value';
 		$max_value_key = $attribute->attribute_name . '_max_value';
 		if (!WC()->query->get_main_query()->post_count && !isset($_GET[$min_value_key]) && !isset($_GET[$max_value_key])) {
@@ -148,6 +155,10 @@ class Woo_Num_Slider extends WP_Widget
 			$form_action = preg_replace('%\/page/[0-9]+%', '', home_url(trailingslashit($wp->request)));
 		}
 
+		// Get query type info
+		$query_key = 'query';
+		$query = $instance['query'];
+
 		// Show the form
 		$id = 'woo_num_slider_' . $attribute->attribute_name;
 	?>
@@ -157,11 +168,12 @@ class Woo_Num_Slider extends WP_Widget
 				<div class="woo_num_slider_amount" style="line-height: 2.4em; text-align: right;">
 					<input type="hidden" id="<?php echo $min_value_key; ?>" name="<?php echo $min_value_key; ?>" value="<?php echo esc_attr($current_min_value); ?>" data-min="<?php echo esc_attr($min_value); ?>" placeholder="<?php echo esc_attr__('Min value', 'woocommerce'); ?>" />
 					<input type="hidden" id="<?php echo $max_value_key; ?>" name="<?php echo $max_value_key; ?>" value="<?php echo esc_attr($current_max_value); ?>" data-max="<?php echo esc_attr($max_value); ?>" placeholder="<?php echo esc_attr__('Max value', 'woocommerce'); ?>" />
+					<input type="hidden" id="<?php echo $query_key; ?>" name="<?php echo $query_key; ?>" value="<?php echo esc_attr($query); ?>" placeholder="<?php echo esc_attr__('Query type', 'woo-num-slider'); ?>" />
 					<button type="submit" class="button" style="padding: 10px 30px; line-height: 13px; float: left;"><?php echo esc_html__('Filter', 'woocommerce'); ?></button>
 					<div class="woo_num_label price_label">
 						<?php echo esc_html__('Value', 'woo-num-slider'); ?>: <span class="from"><?php echo $current_min_value; ?></span> &mdash; <span class="to"><?php echo $current_max_value; ?></span>
 					</div>
-					<?php echo wc_query_string_form_fields(null, array($min_value_key, $max_value_key, 'paged'), '', true); ?>
+					<?php echo wc_query_string_form_fields(null, array($min_value_key, $max_value_key, $query_key, 'paged'), '', true); ?>
 					<div class="clear"></div>
 				</div>
 			</div>
@@ -223,8 +235,12 @@ class Woo_Num_Slider extends WP_Widget
 			return explode('_', $key)[0];
 		}, array_keys($min_value_keys));
 
+		// Get query type
+		$query = 'AND';
+		if (isset($_GET['query'])) $query = $_GET['query'];
+
 		// Compose tax query
-		$tax_query = array('relation' => 'AND');
+		$tax_query = array('relation' => $query);
 		foreach ($attribute_names as $key => $attribute_name) {
 			$min_value = to_numerical($_GET[$attribute_name . '_min_value']);
 			$max_value = to_numerical($_GET[$attribute_name . '_max_value']);
