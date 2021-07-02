@@ -1,15 +1,15 @@
-# Copyright (C) 2020 Alessio Falai
+# Copyright (C) 2021 Alessio Falai
 # This file is distributed under the same license as the Woocommerce Numeric Slider plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Woocommerce Numeric Slider 0.1.2\n"
+"Project-Id-Version: Woocommerce Numeric Slider 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woo-num-slider\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-09-15T21:05:12+00:00\n"
-"PO-Revision-Date: 2020-09-15 23:07+0200\n"
+"POT-Creation-Date: 2021-07-02T20:24:33+00:00\n"
+"PO-Revision-Date: 2021-07-02 22:27+0200\n"
 "X-Generator: Poedit 2.4.1\n"
 "X-Domain: woo-num-slider\n"
 "Last-Translator: \n"
@@ -38,22 +38,26 @@ msgstr ""
 msgid "Alessio Falai"
 msgstr ""
 
-#: woo-num-slider.php:69
+#: woo-num-slider.php:70
 msgid "Title"
 msgstr "Titolo"
 
-#: woo-num-slider.php:71
+#: woo-num-slider.php:72
 msgid "Attribute"
 msgstr "Attributo"
 
-#: woo-num-slider.php:77
+#: woo-num-slider.php:78
+msgid "Unit"
+msgstr "Unità"
+
+#: woo-num-slider.php:80
 msgid "Step"
 msgstr "Passo"
 
-#: woo-num-slider.php:79 woo-num-slider.php:171
+#: woo-num-slider.php:82 woo-num-slider.php:178
 msgid "Query type"
 msgstr "Tipo di interrogazione"
 
-#: woo-num-slider.php:174
+#: woo-num-slider.php:181
 msgid "Value"
 msgstr "Valore"

@@ -4,7 +4,7 @@
  * Plugin Name: Woocommerce Numeric Slider
  * Plugin URI: https://alessiofalai.it
  * Description: A simple widget to filter Woocommerce products by a numeric attribute using a slider.
- * Version: 0.2.0
+ * Version: 0.2.1
  * Author: Alessio Falai
  * Author URI: https://alessiofalai.it
  * Text Domain: woo-num-slider
@@ -62,6 +62,7 @@ class Woo_Num_Slider extends WP_Widget
 		$default_title = $attributes[array_key_first($attributes)]->attribute_label;
 		$attribute = !empty($instance['attribute']) ? $instance['attribute'] : $default_title;
 		$title = !empty($instance['title']) ? $instance['title'] : $attribute;
+		$unit = !empty($instance['unit']) ? $instance['unit'] : "";
 		$step = !empty($instance['step']) ? $instance['step'] : 5;
 		$query = !empty($instance['query']) ? $instance['query'] : 'AND';
 ?>
@@ -74,6 +75,8 @@ class Woo_Num_Slider extends WP_Widget
 					<option <?php selected($attribute, $key); ?> value="<?php echo $key ?>"><?php echo $value->attribute_label ?></option>
 				<?php endforeach ?>
 			</select>
+			<label for="<?php echo $this->get_field_id('unit'); ?>"><?php _e('Unit', 'woo-num-slider'); ?>:</label>
+			<input class="widefat" id="<?php echo $this->get_field_id('unit'); ?>" name="<?php echo $this->get_field_name('unit'); ?>" type="text" value="<?php echo esc_attr($unit); ?>">
 			<label for="<?php echo $this->get_field_id('step'); ?>"><?php _e('Step', 'woo-num-slider'); ?>:</label>
 			<input class="widefat" id="<?php echo $this->get_field_id('step'); ?>" name="<?php echo $this->get_field_name('step'); ?>" type="number" value="<?php echo esc_attr($step); ?>">
 			<label for="<?php echo $this->get_field_id('query'); ?>"><?php _e('Query type', 'woo-num-slider'); ?>:</label>
@@ -91,6 +94,7 @@ class Woo_Num_Slider extends WP_Widget
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['attribute'] = $new_instance['attribute'];
+		$instance['unit'] = $new_instance['unit'];
 		$instance['step'] = $new_instance['step'];
 		$instance['query'] = $new_instance['query'];
 		return $instance;
@@ -159,6 +163,9 @@ class Woo_Num_Slider extends WP_Widget
 		$query_key = 'query';
 		$query = $instance['query'];
 
+		// Get unit of measure
+		$unit = $instance['unit'];
+
 		// Show the form
 		$id = 'woo_num_slider_' . $attribute->attribute_name;
 	?>
@@ -171,7 +178,7 @@ class Woo_Num_Slider extends WP_Widget
 					<input type="hidden" id="<?php echo $query_key; ?>" name="<?php echo $query_key; ?>" value="<?php echo esc_attr($query); ?>" placeholder="<?php echo esc_attr__('Query type', 'woo-num-slider'); ?>" />
 					<button type="submit" class="button" style="padding: 10px 30px; line-height: 13px; float: left;"><?php echo esc_html__('Filter', 'woocommerce'); ?></button>
 					<div class="woo_num_label price_label">
-						<?php echo esc_html__('Value', 'woo-num-slider'); ?>: <span class="from"><?php echo $current_min_value; ?></span> &mdash; <span class="to"><?php echo $current_max_value; ?></span>
+						<?php echo esc_html__('Value', 'woo-num-slider'); ?>: <span class="from"><?php echo $current_min_value . $unit; ?></span> &mdash; <span class="to"><?php echo $current_max_value . $unit; ?></span>
 					</div>
 					<?php echo wc_query_string_form_fields(null, array($min_value_key, $max_value_key, $query_key, 'paged'), '', true); ?>
 					<div class="clear"></div>
@@ -191,9 +198,9 @@ class Woo_Num_Slider extends WP_Widget
 						values: [<?php echo $current_min_value; ?>, <?php echo $current_max_value; ?>],
 						slide: function(event, ui) {
 							$("#<?php echo $id; ?> .woo_num_slider_wrapper .woo_num_slider_amount #<?php echo $min_value_key; ?>").val(ui.values[0]);
-							$("#<?php echo $id; ?> .woo_num_slider_wrapper .woo_num_slider_amount .woo_num_label .from").html(ui.values[0]);
+							$("#<?php echo $id; ?> .woo_num_slider_wrapper .woo_num_slider_amount .woo_num_label .from").html(ui.values[0].toString() + "<?php echo $unit; ?>");
 							$("#<?php echo $id; ?> .woo_num_slider_wrapper .woo_num_slider_amount #<?php echo $max_value_key; ?>").val(ui.values[1]);
-							$("#<?php echo $id; ?> .woo_num_slider_wrapper .woo_num_slider_amount .woo_num_label .to").html(ui.values[1]);
+							$("#<?php echo $id; ?> .woo_num_slider_wrapper .woo_num_slider_amount .woo_num_label .to").html(ui.values[1].toString() + "<?php echo $unit; ?>");
 						}
 					});
 				});
